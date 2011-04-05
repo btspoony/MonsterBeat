@@ -31,3 +31,5 @@ end
 
 -- setup all ui first show logo UI
 initer:start()
+
+utils.Stats()

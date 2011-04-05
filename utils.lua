@@ -40,3 +40,53 @@ end
 function gamepath( path )
 	return 'game/' .. path
 end
+
+-- display the fps and texture memory useage
+function Stats( params )
+	local stage 
+	
+	if( params and params.stage ) then stage = params.stage
+	else stage = display.getCurrentStage() end
+	
+	
+	local fps = 0
+	
+	local g = display.newGroup()
+	
+	-- create the background
+	local bg = display.newRect( 0,0, 160, 45 )
+	bg:setFillColor( 0, 0, 32, 200 )
+	bg.strokeWidth = 1
+	bg:setStrokeColor( 64, 64, 64 )
+	g:insert( bg )
+	
+	-- create the text field
+	local txt = display.newText( ' ', 0,0, native.systemFont, 12 )
+	txt:setTextColor( 255, 255, 255 )
+	g:insert( txt )
+	
+	-- fps
+	function g:enterFrame( e )
+		fps = fps + 1
+	end
+	
+	-- update
+	function g:timer( e )
+		stage:insert( g ) -- top the group
+		txt.text = 'FPS: ' .. fps .. '\n' .. 'Texture Memory: ' .. system.getInfo( 'textureMemoryUsed' )
+		txt:setReferencePoint( display.TopLeftReferencePoint )
+		txt.x = 4
+		txt.y = 4
+		bg:setReferencePoint( display.TopLeftReferencePoint )
+		bg.x = 0
+		bg.y = 0
+		fps = 0
+	end
+	
+	-- initialize
+	g:timer()
+	Runtime:addEventListener( 'enterFrame', g )
+	timer.performWithDelay( 1000, g, 0 )
+	
+	return g
+end
