@@ -14,7 +14,7 @@ local gameAssets = require(utils.gamepath( 'gameAssets' ))
 -- Basic Gameplay
 local function onSpawn(event)
 	local newShape = nil
-		
+	
 	local pos = event.position
 	if pos == "A" then
 		newShape = display.newRect(0,0,50,200)

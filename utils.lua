@@ -54,7 +54,7 @@ function Stats( params )
 	local g = display.newGroup()
 	
 	-- create the background
-	local bg = display.newRect( 0,0, 160, 45 )
+	local bg = display.newRect( 0,0, 200, 30 )
 	bg:setFillColor( 0, 0, 32, 200 )
 	bg.strokeWidth = 1
 	bg:setStrokeColor( 64, 64, 64 )
@@ -80,6 +80,9 @@ function Stats( params )
 		bg:setReferencePoint( display.TopLeftReferencePoint )
 		bg.x = 0
 		bg.y = 0
+		self:setReferencePoint( display.BottomLeftReferencePoint )
+		self.x = 0
+		self.y = display.contentHeight
 		fps = 0
 	end
 	
