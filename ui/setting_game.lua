@@ -12,8 +12,8 @@ layout=
 		},
 		{
 			type = "game_pause",
-			x = 10,
-			y = 10
+			x = display.contentWidth-20,
+			y = 20,
 		},
 	},
 	-- event handlers
