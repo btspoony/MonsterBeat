@@ -23,15 +23,15 @@
 
 module(..., package.seeall)
 
-local screenW, screenH = display.contentWidth, display.contentHeight
-local viewableScreenW, viewableScreenH = display.viewableContentWidth, display.viewableContentHeight
-local screenOffsetW, screenOffsetH = display.contentWidth -  display.viewableContentWidth, display.contentHeight - display.viewableContentHeight
+-- local screenW, screenH = display.contentWidth, display.contentHeight
+-- local viewableScreenW, viewableScreenH = display.viewableContentWidth, display.viewableContentHeight
+-- local screenOffsetW, screenOffsetH = display.contentWidth -  display.viewableContentWidth, display.contentHeight - display.viewableContentHeight
 
 local imgNum = nil
 local images = nil
 local nextImage, prevImage, cancelMove, slideTo, sliding
-local background, imageHolder
-local imageNumberText, imageNumberTextShadow
+local hitarea, imageHolder
+-- local imageNumberText, imageNumberTextShadow
 local startPos, prevPos
 
 
@@ -43,44 +43,38 @@ local START_RAD = -math.pi / 2
 
 
 function new( args )
-	local top				= args.top or 0 
-	local bottom			= args.bottom or 0
-	local slideBackground	= args.background
-	local imageSet 			= args.imageSet
-	local onSelect			= args.onSelect
+	local imageSet 		= args.imageSet
+	local onSelect		= args.onSelect
 
 	local g = display.newGroup()
 	
-	-- create background
-	if slideBackground then
-		background = display.newImage(slideBackground, 0, 0, true)
-	else
-		background = display.newRect( 0, 0, screenW, screenH-(top+bottom) )
-		background:setFillColor(0, 0, 0)
-	end
-	g:insert(background)
+	-- create hitarea
+	local hitarea = g
+	-- hitarea = display.newRect( 0, 0, screenW, screenH-(top+bottom) )
+	-- hitarea:setFillColor(0, 0, 0)
+	-- g:insert(hitarea)
 	
 	-- create images
 	imageHolder = display.newGroup()
 	g:insert( imageHolder )
 	
-	local h = viewableScreenH - ( top + bottom ) 
-	imageHolder.x = screenW * .5
-	imageHolder.y = h * .5
+	-- local h = viewableScreenH - ( top + bottom ) 
+	-- imageHolder.x = screenW * .5
+	-- imageHolder.y = h * .5
 	imageHolder.slidePos = 0
 	
 	images = {}
 	for i = 1,#imageSet do
 		local p = display.newImage(imageSet[i])
-		if p.width > viewableScreenW or p.height > h then
-			if p.width/viewableScreenW > p.height/h then 
-					p.xScale = viewableScreenW/p.width
-					p.yScale = viewableScreenW/p.width
-			else
-					p.xScale = h/p.height
-					p.yScale = h/p.height
-			end		 
-		end
+		-- if p.width > viewableScreenW or p.height > h then
+			-- if p.width/viewableScreenW > p.height/h then 
+					-- p.xScale = viewableScreenW/p.width
+					-- p.yScale = viewableScreenW/p.width
+			-- else
+					-- p.xScale = h/p.height
+					-- p.yScale = h/p.height
+			-- end		 
+		-- end
 		imageHolder:insert(p)
 		images[i] = p
 		
@@ -92,48 +86,48 @@ function new( args )
 	sliding()
 	
 	-- create nar text display
-	local defaultString = "1 of " .. #images
+	-- local defaultString = "1 of " .. #images
 
-	local navBar = display.newGroup()
-	g:insert(navBar)
+	-- local navBar = display.newGroup()
+	-- g:insert(navBar)
 	
 	-- local navBarGraphic = display.newImage("start/navBar.png", 0, 0, false)
 	-- navBar:insert(navBarGraphic)
 	-- navBarGraphic.x = viewableScreenW*.5
 	-- navBarGraphic.y = 0
 			
-	imageNumberText = display.newText(defaultString, 0, 0, native.systemFontBold, 14)
-	imageNumberText:setTextColor(255, 255, 255)
-	imageNumberTextShadow = display.newText(defaultString, 0, 0, native.systemFontBold, 14)
-	imageNumberTextShadow:setTextColor(0, 0, 0)
-	navBar:insert(imageNumberTextShadow)
-	navBar:insert(imageNumberText)
-	imageNumberText.x = navBar.width*.5
+	-- imageNumberText = display.newText(defaultString, 0, 0, native.systemFontBold, 14)
+	-- imageNumberText:setTextColor(255, 255, 255)
+	-- imageNumberTextShadow = display.newText(defaultString, 0, 0, native.systemFontBold, 14)
+	-- imageNumberTextShadow:setTextColor(0, 0, 0)
+	-- navBar:insert(imageNumberTextShadow)
+	-- navBar:insert(imageNumberText)
+	-- imageNumberText.x = navBar.width*.5
 	-- imageNumberText.y = navBarGraphic.y
-	imageNumberTextShadow.x = imageNumberText.x - 1
-	imageNumberTextShadow.y = imageNumberText.y - 1
+	-- imageNumberTextShadow.x = imageNumberText.x - 1
+	-- imageNumberTextShadow.y = imageNumberText.y - 1
 	
-	navBar.y = math.floor(navBar.height*0.5)
+	-- navBar.y = math.floor(navBar.height*0.5)
 	
-	function setSlideNumber()
-		print("setSlideNumber", imgNum .. " of " .. #images)
-		imageNumberText.text = imgNum .. " of " .. #images
-		imageNumberTextShadow.text = imgNum .. " of " .. #images
-	end
+	-- function setSlideNumber()
+		-- print("setSlideNumber", imgNum .. " of " .. #images)
+		-- imageNumberText.text = imgNum .. " of " .. #images
+		-- imageNumberTextShadow.text = imgNum .. " of " .. #images
+	-- end
 	
 	-- init
 	imgNum = 1
 	
-	g.x = 0
-	g.y = top + display.screenOriginY
+	-- g.x = 0
+	-- g.y = top + display.screenOriginY
 	
 	Runtime:addEventListener( 'enterFrame', sliding )
 	
-	background:addEventListener( "touch", background )
+	hitarea:addEventListener( "touch", hitarea )
 	
 	local dragSpeed = 0
 	local touchTime = 0
-	function background:touch ( e ) 
+	function hitarea:touch ( e ) 
 		local phase = e.phase
 		
 		print("slides", phase)
@@ -218,9 +212,15 @@ function new( args )
 
 	function g:cleanUp()
 		print("slides cleanUp")
-		background:removeEventListener( 'touch', background )
+		hitarea:removeEventListener( 'touch', hitarea )
 		Runtime:removeEventListener( 'enterFrame', sliding )
 		if tween then transition.cancel( tween ) end
+	end
+	
+	local removeSelf = g.removeSelf;
+	function g:removeSelf()
+		g:cleanUp()
+		removeSelf( g )
 	end
 
 	return g	
@@ -250,7 +250,7 @@ function slideTo( num )
 	elseif num > #images then num = #images end
 	
 	imgNum = num
-	setSlideNumber()
+	-- setSlideNumber()
 	
 	local pos = -INC_RAD * ( imgNum - 1 )
 	

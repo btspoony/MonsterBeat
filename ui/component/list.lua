@@ -48,7 +48,7 @@ end
 function newListItemHandler(self, event) 
         local t = currentTarget --could use self.target.parent possibly
         local phase = event.phase
-        print("touch: ".. phase)
+        -- print("touch: ".. phase)
  
         local default = self.default
         local over = self.over
