@@ -3,8 +3,6 @@ module (..., package.seeall)
 --[[	
 	Private Group
 --]]
--- Layout
-local layout = require( utils.uipath('component/layout') )
 
 -- Managers
 local levelManager = require(utils.gamepath( 'LevelManager' ))

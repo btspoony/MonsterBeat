@@ -6,6 +6,9 @@ require('res')
 -- helper
 require('utils')
 
+-- layout common
+require('layout')
+
 -- model
 require( utils.modelpath('preloader') )
 

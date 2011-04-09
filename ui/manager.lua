@@ -2,7 +2,6 @@ module(..., package.seeall)
 
 local assets = 		require( utils.uipath('assets') )
 local controller = 	require( utils.uipath('controller') )
-local layout = 		require( utils.uipath('component/layout') )
 
 local _uiList = {}
 local _uiListIndex = 0
