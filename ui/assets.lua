@@ -2,7 +2,7 @@ module(..., package.seeall)
 
 local ui			= require( utils.uipath('component/ui') )
 local slide			= require( utils.uipath('component/slide') )
-local list			= require( utils.uipath('component/list') )
+local list			= require( utils.uipath('component/simplelist') )
 local controller	= require( utils.uipath('controller') )
 local gameModel		= require( utils.modelpath('game') )
 local gameManager	= require( utils.gamepath('gameManager') )
@@ -42,10 +42,7 @@ function start_slide()
 	}
 	local g = slide.new{ 
 		imageSet = imgs,
-		onSelect = controller.start_slide.onSelect
-		--background = 'start/background.png',
-		--tJPGop =,
-		--bottom =,
+		onSelect = controller.start_slide.onSelect,
 	}
 	return g
 end
@@ -56,7 +53,7 @@ function ready_chooser()
 	-- setup some data
 	local data = {}
 	for i=1, 4 do
-		data[i] = "List item ".. i
+		data[i] = math.min( i, 3 )
 	end
 	
 	local topBoundary = display.screenOriginY + 40

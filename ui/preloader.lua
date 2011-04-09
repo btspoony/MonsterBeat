@@ -5,6 +5,7 @@ require( utils.uipath('controller') )
 
 -- ui components
 require( utils.uipath('component/list') )
+require( utils.uipath('component/simplelist') )
 require( utils.uipath('component/slide') )
 require( utils.uipath('component/ui') )
 

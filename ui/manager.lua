@@ -11,6 +11,8 @@ local _uiCache = {}
 ------------------------------------------ Push UI
 -- push ui
 function pushUI( ui )
+	if( _currentUI == ui ) then return ui end
+	
 	_currentUI = ui
 	
 	_uiListIndex = _uiListIndex + 1
@@ -18,11 +20,7 @@ function pushUI( ui )
 	display.getCurrentStage():insert( _currentUI )
 
 	print('push', _currentUI)
-	-- utils.printTable( _currentUI )
 
-	-- TODO debug
-	-- _currentUI:dispatchEvent( { name = "pushToStage", target = _currentUI } )
-	
 	return ui
 end
 
@@ -40,8 +38,6 @@ function popUI( clean )
 	_uiListIndex = _uiListIndex - 1
 	if _uiListIndex > 0 then _currentUI = _uiList[ _uiListIndex ]
 	else _currentUI = nil end
-	-- TODO debug
-	--ui:dispatchEvent({ name='popFromStage', target = ui })
 
 	return ui
 end
@@ -66,15 +62,15 @@ function getUI( setting )
 end
 -- ui factory
 function factory( a_type )
-	if assets[ a_type ] then return assets[ a_type ]() end
-	if layout[ a_type ] then return layout[ a_type ]() end
+	if assets[ a_type ] then return assets[ a_type ] end
+	if layout[ a_type ] then return layout[ a_type ] end
 	
 	error('Unknow type:'..a_type)
 end
 -- create component or layout
 function create( layout )
 	-- create component
-	local comp = factory( layout.type )
+	local comp = factory( layout.type )( layout )
 
 	-- setup (dirty) properties
 	comp._layout = layout

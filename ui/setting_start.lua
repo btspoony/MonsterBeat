@@ -8,9 +8,14 @@ layout=
 	children=
 	{
 		{
-			type = "start_slide",
+			type = "background",
+			src = res.getArt('ui','start/bg.png'),
 		},
-		
+		{
+			type = "start_slide",
+			x = display.contentWidth * .5,
+			y = display.contentHeight * .65,
+		},
 	}
 	-- event handlers
 }
