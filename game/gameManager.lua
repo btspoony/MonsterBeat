@@ -9,35 +9,50 @@ local levelManager = require(utils.gamepath( 'LevelManager' ))
 local sfxManager = require(utils.gamepath( 'sfxManager' ))
 local gameAssets = require(utils.gamepath( 'gameAssets' ))
 
+-- Model
+local gameEntity = require(utils.modelpath('game'))
+
 -- Basic Gameplay
 local function onSpawn(event)
-	local newShape = nil
+	-- init item
+	local itemParam = {}
+	local newItem = nil
 	
-	local pos = event.position
-	if pos == "A" then
-		newShape = display.newRect(0,0,50,200)
-		newShape:setFillColor(50,50,50)
-	elseif pos == "B" then
-		newShape = display.newRect(50,0,50,200)
-		newShape:setFillColor(100,50,50)
-	elseif pos == "C" then
-		newShape = display.newRect(100,0,50,200)
-		newShape:setFillColor(150,50,50)
-	elseif pos == "D" then
-		newShape = display.newRect(150,0,50,200)
-		newShape:setFillColor(200,50,50)
-	elseif pos == "E" then
-		newShape = display.newRect(200,0,50,200)
-		newShape:setFillColor(250,50,50)
+	-- set item param
+	if math.random()>0.5 then itemParam.type ="things" else itemParam.type ="food" end
+	
+	-- create item
+	newItem = gameAssets.geneThrowable(itemParam, currentGame.canvas)
+	newItem:setReferencePoint(display.CenterReferencePoint)
+	
+	-- get some info
+	local tick = (60*1000/currentGame.level.info.bpm)
+	print(tick)
+	local itemPosInfo = gameEntity.itemPosLib[event.position]
+	
+	if itemPosInfo == nil then
+		newItem:removeSelf()
+		return false
 	end
 	
-	-- remove shape in 0.5s
-	local function removeSelf()
-		newShape:removeSelf()
-	end
-	timer.performWithDelay(500, removeSelf)
+	newItem.x = itemPosInfo.oX
+	newItem.y = itemPosInfo.oY
 	
-	print("Current Position: "..pos)
+	transition.to(newItem, {
+		time = tick*1.75,
+		x = itemPosInfo.tX,
+		y = itemPosInfo.tY,
+		transition=easing.inOutExpo,
+		onComplete = function( evt )
+			-- remove shape in tick time
+			local function removeSelf()
+				newItem:removeSelf()
+			end
+			timer.performWithDelay(tick*.5, removeSelf)
+		end
+	})
+	
+	print("Current Position: "..event.position)
 	return true
 end
 
@@ -61,7 +76,7 @@ function loadGame( param )
 	currentGame.status = "ready"
 	currentGame.param = param
 
-	local gameCanvas = layout.group()	-- Game Canvas
+	local gameCanvas = layout.group() -- Game Canvas
 	currentGame.canvas = gameCanvas
 	currentGame.level = levelManager.loadLevel(param.level) -- Level init
 	
@@ -70,7 +85,9 @@ function loadGame( param )
 	gameCanvas:insert(gamebg)
 	
 	-- Set Basic UI
-	-- TODO
+	local gameUI = layout.group() -- Game UI
+	currentGame.ui = gameUI
+	gameUI = display.newText( "Score: 0", 10, 18, "Helvetica", 16 )
 	
 	-- If game should start at beginning
 	if(param.startAtBegin) then
@@ -78,7 +95,7 @@ function loadGame( param )
 		startGame(param.subLevel)
 	end
 	
-	return gameCanvas, currentGame
+	return gameCanvas, gameUI, currentGame
 end
 
 -- Start
@@ -91,6 +108,7 @@ function startGame( level )
 		level = currentGame.param.subLevel
 	end
 	
+	-- Start Game Level
 	currentGame.level:startLevel(level,	{ ["spawn"] = onSpawn,["complete"] = onComplete })
 	
 	currentGame.status = "started"
@@ -112,5 +130,7 @@ function quitGame()
 	currentGame.level = nil
 	currentGame.canvas:removeSelf()
 	currentGame.canvas =nil
+	currentGame.ui:removeSelf()
+	currentGame.ui =nil
 	currentGame = nil;
 end

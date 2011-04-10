@@ -93,9 +93,10 @@ function loadLevel(levelname)
 		 		onComplete = function(event) this:onComplete() end})
 		
 		-- start the tick 
-	 	timer.performWithDelay( (60*1000/self.info.bpm), self, 0 )
+		local tick = (60*1000/self.info.bpm)
+	 	timer.performWithDelay( tick, self, 0 )
 	 	
-		return self.info.levels[i]
+		return self.info.levels[i], tick
  	end
 	
  	-- Stop Level
