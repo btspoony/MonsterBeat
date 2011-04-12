@@ -56,8 +56,15 @@ end
 game_pause = {}
 function game_pause.onRelease( e )
 	uiManager.pushUI( uiManager.getUI( utils.uipath('setting_pause') ) )
-	--TODO pause game
+	
 	gameManager.pauseGame()
+	
+	local pauseUI = uiManager.getCurrentUI()
+	local holder = pauseUI:getChildByName( 'holder' )
+	transition.to( holder, { y = holder.showYPos, 
+							time = 300,
+							transition = easing.outQuad,
+	} )
 end
 
 -- pause
@@ -65,8 +72,33 @@ pause_back = {}
 function pause_back.onRelease( e )
 	local pauseUI = uiManager.popUI( true )
 	pauseUI:removeSelf()
-	--TODO resume game
-	gameManager.resumeGame()
+	local game = uiManager.popUI( true )
+	game:removeSelf()
+	--TODO destroy game
+	uiManager.getUI( utils.uipath('setting_start') )
+end
+
+pause_resume = {}
+function pause_resume.onRelease( e )
+	function complete()
+		local pauseUI = uiManager.popUI( true )
+		pauseUI:removeSelf()
+
+		gameManager.resumeGame()
+	end
+	
+	local pauseUI = uiManager.getCurrentUI()
+	local holder = pauseUI:getChildByName( 'holder' )
+	transition.to( holder, { y = holder.hideYPos, 
+							time = 300,
+							transition = easing.inOutQuad,
+							onComplete = complete
+	} )
+end
+
+pause_again = {}
+function pause_again.onRelease( e )
+	--TODO again game
 end
 
 -- win

@@ -20,7 +20,7 @@ function pushUI( ui )
 	display.getCurrentStage():insert( _currentUI )
 
 	print('push', _currentUI)
-
+	
 	return ui
 end
 
@@ -38,7 +38,7 @@ function popUI( clean )
 	_uiListIndex = _uiListIndex - 1
 	if _uiListIndex > 0 then _currentUI = _uiList[ _uiListIndex ]
 	else _currentUI = nil end
-
+	
 	return ui
 end
 
@@ -96,7 +96,7 @@ function create( layout )
 	if comp.adjust then
 		comp:adjust()
 	end
-
+	
 	-- return component
 	return comp
 end

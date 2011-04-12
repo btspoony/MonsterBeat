@@ -93,3 +93,13 @@ function Stats( params )
 	
 	return g
 end
+
+
+--
+function table_copy( source )
+	local dest = {}
+	for i,v in pairs( source ) do
+		dest[i] = v
+	end
+	return dest
+end

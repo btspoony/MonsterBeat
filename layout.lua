@@ -12,26 +12,41 @@ function group()
 	-- override
 	local removeSelf = g.removeSelf
 	function g:removeSelf()
-		local i = g.numChildren
-		while i > 0 do
-			if g[i] then
-				local child = g[i]
-				
-					-- if child.cleanUp then child:cleanUp()
-				-- elseif child.destroy then child:destroy()
-				-- elseif child.dispose then child:dispose() end
-				
-				child:removeSelf()
+		for i = self.numChildren, 1, -1 do
+			if self[i].removeSelf then
+				self[i]:removeSelf()
 			end
-			
-			i = i - 1
 		end
-		removeSelf( g )
+		removeSelf( self )
+	end
+	
+	function g:getChildByName( name )
+		for i, v in ipairs( self._layout.children ) do
+			if name == v.name then
+				return self[i]
+			end
+		end
+		
+		return nil
 	end
 	
 	return g
 end
 
+function hgroup()
+	local g = group()
+	
+	function g:adjust()
+		local gap = g.gap or 5
+		
+		for i=2, self.numChildren do
+			-- guess the registration point is always at center
+			g[i].x = g[i - 1].x + ( g[i - 1].width + g[i].width ) * .5 + gap
+		end
+	end
+	
+	return g
+end
 
 function background( layout )
 	return display.newImage( layout.src )

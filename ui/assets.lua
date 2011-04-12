@@ -7,7 +7,6 @@ local controller	= require( utils.uipath('controller') )
 local gameModel		= require( utils.modelpath('game') )
 local gameManager	= require( utils.gamepath('gameManager') )
 
--- local gameManager = require('gameManager')
 
 
 -- logo
@@ -106,8 +105,8 @@ end
 
 function game_pause()
 	local btn = ui.newButton{
-		default = res.getArt('ui',"game/pause.jpg"),
-		over = res.getArt('ui',"game/pause.jpg"),
+		default = res.getArt('ui',"game/pause.png"),
+		over = res.getArt('ui',"game/pause.png"),
 		--onPress = controller.mainmenu_play,
 		onRelease = controller.game_pause.onRelease,
 		--text = "Button 1 Label",
@@ -117,9 +116,28 @@ function game_pause()
 end
 
 -- pause
-function pause_background()
-	local bg = display.newImage( res.getArt('ui',"pause/background.PNG") )
-	return bg
+function pause_cover()
+	local rect = display.newRect( 0, 0, display.contentWidth , display.contentHeight )
+	rect:setFillColor( 0, 0, 0, 100 )
+	return rect
+end
+
+function pause_resume()
+	local btn = ui.newButton{
+		default = res.getArt('ui',"pause/resume.png"),
+		over = res.getArt('ui',"pause/resume.png"),
+		onRelease = controller.pause_resume.onRelease,
+	}
+	return btn
+end
+
+function pause_again()
+	local btn = ui.newButton{
+		default = res.getArt('ui',"pause/again.png"),
+		over = res.getArt('ui',"pause/again.png"),
+		onRelease = controller.pause_again.onRelease,
+	}
+	return btn
 end
 
 function pause_back()
