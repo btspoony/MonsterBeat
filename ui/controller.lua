@@ -73,8 +73,7 @@ function pause_back.onRelease( e )
 	local pauseUI = uiManager.popUI( true )
 	pauseUI:removeSelf()
 	local game = uiManager.popUI( true )
-	game:removeSelf()
-	--TODO destroy game
+	gameManager.quitGame()
 	uiManager.getUI( utils.uipath('setting_start') )
 end
 

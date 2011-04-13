@@ -94,13 +94,6 @@ end
 function game_main()
 	local canvas = gameManager.loadGame( gameModel.initParam )
 	return canvas
-	
-	-- local btn = ui.newButton{
-		-- default = res.getArt('ui',"game/main.jpg"),
-		-- over = res.getArt('ui',"game/main.jpg"),
-		-- onRelease = controller.game_main.onRelease,
-	-- }
-	-- return btn
 end
 
 function game_pause()
