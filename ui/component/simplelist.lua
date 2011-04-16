@@ -4,6 +4,8 @@ module(..., package.seeall)
 
 local currentTarget, detailScreen, velocity, currentDefault, currentOver, prevY
 local startTime, lastTime, prevTime = 0, 0, 0
+local items
+
  
 --methods
  
@@ -85,7 +87,6 @@ function newListItem(params)
         local default = params.default
         local over = params.over
         local onRelease = params.onRelease
-        local callback = params.callback 
         local id = params.id
  
         local thisItem = display.newGroup()
@@ -136,11 +137,12 @@ function newList(params)
         local onRelease = params.onRelease
 		
 		
+		items = {}
+		
         --setup the list view
         local listView = display.newGroup()
         local prevY, prevH = 0, 0
 		
-        
         --iterate over the data and add items to the list view
 		local thisItem
 		for i=1, #data do
@@ -152,22 +154,74 @@ function newList(params)
 				id = i
 			}
 
-			listView:insert( thisItem )     
+			listView:insert( thisItem ) 
+			items[ i ] = thisItem
 
-			thisItem.y = prevY + prevH
+			local y = prevY + prevH
+			thisItem.expandYPos = y
+			thisItem.shrinkYPos = 0
 
 			--save the Y and height 
-			prevY = thisItem.y
+			prevY = y
 			prevH = thisItem.height		
 		end --for
+		
+		-- reverse depth items
+		for i = #data, 1, -1 do
+			listView:insert( listView[ i ] )
+		end
         
-		-- align by top center
+		-- align to top center of group
         listView.x = -thisItem.default.width * .5
         listView.y = 0
         
 		-- container
 		local g = display.newGroup()
+		g:insert( listView )
 		
+		-- concrete effect function
+		function g:expand( args )
+			local onComplete = args.onComplete or function() end
+			
+			local n = 0
+			function complete()
+				n = n + 1
+				if ( n == #data ) then onComplete() end
+			end
+			
+			for i=1, #data do
+				transition.to( items[ i ], { 
+					y = items[ i ].expandYPos,
+					time = 200,
+					delay = 33 * ( i - 1 ),
+					onComplete = complete,
+					transition = easing.outQuad
+				} )
+			end
+		end
+		
+		function g:shrink( args )
+			local onComplete = args.onComplete or function() end
+			
+			local n = 0
+			function complete()
+				n = n + 1
+				if ( n == #data ) then onComplete() end
+			end
+			
+			local len = #data + 1
+			for i = #data, 1, -1 do
+				transition.to( items[ len - i ], { 
+					y = items[ len - i ].shrinkYPos,
+					time = 150,
+					delay = 33 * ( i - 1 ),
+					onComplete = complete,
+					transition = easing.inQuad
+				} )
+			end
+		end
+		
+		-- destroy function
 		function g:cleanUp()
 			print("tableView cleanUp")
             Runtime:removeEventListener( "enterFrame", showHighlight )
@@ -180,13 +234,13 @@ function newList(params)
 			end
 		end
 		
-		
+		-- override removeSelf
 		local removeSelf = g.removeSelf;
 		function g:removeSelf()
-			g:cleanUp()
+			self:cleanUp()
 			removeSelf( g )
 		end
-		g:insert( listView )
+
 		
         return g
 end

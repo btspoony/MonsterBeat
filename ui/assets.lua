@@ -55,25 +55,12 @@ function ready_chooser()
 		data[i] = math.min( i, 3 )
 	end
 	
-	local topBoundary = display.screenOriginY + 40
-	local bottomBoundary = display.screenOriginY + 0
-	
 	-- create the list
 	local list = list.newList{
 		data			= data,
 		default			= res.getArt('ui',"ready/listItemBg.png"),
 		over			= res.getArt('ui',"ready/listItemBg_over.png"),
 		onRelease		= controller.ready_chooser.onSelect,
-		top				= topBoundary,
-		bottom			= bottomBoundary,
-		backgroundColor	= { 255, 255, 255 },
-		callback=function(row) 
-				local t = display.newText(row, 0, 0, native.systemFontBold, 16)
-				t:setTextColor(0, 0, 0)
-				t.x = math.floor(t.width/2) + 12
-				t.y = 46 
-				return t
-			end
 	}
 	return list
 end

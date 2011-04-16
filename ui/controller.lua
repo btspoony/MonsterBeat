@@ -13,9 +13,24 @@ end
 -- start
 start_slide = {}
 function start_slide.onSelect( e )
-	local ui = uiManager.getUI( utils.uipath('setting_ready') )
-	ui.isVisible = true
-	uiManager.pushUI( ui )
+	function complete()
+		local readyUI = uiManager.getUI( utils.uipath('setting_ready') )
+		uiManager.pushUI( readyUI )
+		local list = readyUI:getChildByName( 'list' )
+		list:expand{ onComplete = nil }
+	end
+	
+	local startUI = uiManager.getCurrentUI()
+	print('startUI = ', startUI)
+	local slider = startUI:getChildByName( 'slider' )
+	slider:rise{ 
+		moveY = slider.hideYPos,
+		onComplete = complete,
+	}
+	
+	-- local ui = uiManager.getUI( utils.uipath('setting_ready') )
+	-- ui.isVisible = true
+	-- uiManager.pushUI( ui )
 end
 
 -- ready
@@ -33,10 +48,23 @@ end
 
 ready_back = {}
 function ready_back.onRelease( e )
-	uiManager.popUI().isVisible = false
+	local readyUI = uiManager.popUI( true )
+	local list = readyUI:getChildByName( 'list' )
+	
+	function complete()
+		local startUI = uiManager.getCurrentUI()
+		local slider = startUI:getChildByName( 'slider' )
+		slider:back{ moveY = slider.showYPos, onComplete = nil }
+		
+		readyUI:removeSelf()
+	end
+	
+	list:shrink{ onComplete = complete }
 end
 
 -- game
+
+--- test ---
 game_main = {}
 function game_main.onRelease( e )
 	-- remove game
@@ -52,6 +80,7 @@ function game_main.onRelease( e )
 	-- push win/lose
 	uiManager.pushUI( ui )
 end
+--- test end ---
 
 game_pause = {}
 function game_pause.onRelease( e )
@@ -74,7 +103,9 @@ function pause_back.onRelease( e )
 	pauseUI:removeSelf()
 	local game = uiManager.popUI( true )
 	gameManager.quitGame()
-	uiManager.getUI( utils.uipath('setting_start') )
+	
+	local startUI = uiManager.getUI( utils.uipath('setting_start') )
+	uiManager.pushUI( startUI )
 end
 
 pause_resume = {}
@@ -98,6 +129,7 @@ end
 pause_again = {}
 function pause_again.onRelease( e )
 	--TODO again game
+	print('--TODO again game')
 end
 
 -- win

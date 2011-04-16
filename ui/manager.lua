@@ -5,21 +5,19 @@ local controller = 	require( utils.uipath('controller') )
 
 local _uiList = {}
 local _uiListIndex = 0
-local _currentUI
 local _uiCache = {}
 
 ------------------------------------------ Push UI
 -- push ui
 function pushUI( ui )
-	if( _currentUI == ui ) then return ui end
-	
-	_currentUI = ui
+	if( getCurrentUI() == ui ) then return ui end
 	
 	_uiListIndex = _uiListIndex + 1
-	_uiList[ _uiListIndex ] = _currentUI
-	display.getCurrentStage():insert( _currentUI )
+	_uiList[ _uiListIndex ] = ui
+	local stage = display.getCurrentStage()
+	stage:insert( ui )
 
-	print('push', _currentUI)
+	print('push', ui)
 	
 	return ui
 end
@@ -29,15 +27,13 @@ end
 function popUI( clean )
 	if _uiListIndex < 1 then return nil end
 
-	local ui = _uiList[ _uiListIndex ]
+	local ui = getCurrentUI()
 	if clean then _uiCache[ ui._layout ] = nil end
 
 	print('pop', ui)
 	
 	_uiList[ _uiListIndex ] = nil
 	_uiListIndex = _uiListIndex - 1
-	if _uiListIndex > 0 then _currentUI = _uiList[ _uiListIndex ]
-	else _currentUI = nil end
 	
 	return ui
 end
@@ -45,7 +41,7 @@ end
 ------------------------------------------ Get Current UI
 -- current ui
 function getCurrentUI()
-	return _currentUI
+	return _uiList[ _uiListIndex ]
 end
 
 ------------------------------------------ Create UI From Setting

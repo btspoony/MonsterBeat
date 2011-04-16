@@ -13,6 +13,11 @@ layout=
 		},
 		{
 			type = "start_slide",
+			name = 'slider',
+			
+			hideYPos = display.contentHeight * .28,
+			showYPos = display.contentHeight * .65,
+			
 			x = display.contentWidth * .5,
 			y = display.contentHeight * .65,
 		},
