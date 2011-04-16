@@ -1,3 +1,6 @@
+-- copy needed functions to local scope
+local ipairs = ipairs
+
 module (..., package.seeall)
 
 --[[
@@ -44,7 +47,7 @@ function geneThrowable( param , container)
 		for i,v in ipairs(itemLib) do
 			if itemLib[i].name == param.name then
 				for n=1,count do
-					createItem(itemGroup, res.getArt('things', itemLib[i].asset))
+					createItem(itemGroup, res.getArt('things', itemLib[i].asset..itemLib[i].ext))
 				end
 				break
 			end
@@ -53,7 +56,7 @@ function geneThrowable( param , container)
 		local itemMax = #itemLib
 		for n=1,count do
 			local r = math.random(1, itemMax)
-			createItem(itemGroup, res.getArt('things', itemLib[r].asset))
+			createItem(itemGroup, res.getArt('things', itemLib[r].asset..itemLib[r].ext))
 		end
 	end
 

@@ -8,6 +8,10 @@ layout=
 	children=
 	{
 		{
+			type = "background",
+			src = res.getArt('ui','mainmenu/bg.png'),
+		},
+		{
 			type = "mainmenu_play",
 			x = display.contentWidth  * .5,
 			y = display.contentHeight * .5,
