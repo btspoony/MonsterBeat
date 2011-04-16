@@ -8,7 +8,6 @@ local gameModel		= require( utils.modelpath('game') )
 local gameManager	= require( utils.gamepath('gameManager') )
 
 
-
 -- logo
 function logo()
 	return display.newImage( res.getArt('ui','logo/logo.png') )
@@ -17,8 +16,8 @@ end
 -- main menu
 function mainmenu_play()
 	local btn = ui.newButton{
-		default = res.getArt('ui',"mainmenu/play.png"),
-		over = res.getArt('ui',"mainmenu/play.png"),
+		default = res.getArt('ui',"mainmenu/btn_play.png"),
+		over = res.getArt('ui',"mainmenu/btn_play.png"),
 		--onPress = controller.mainmenu_play,
 		onRelease = controller.mainmenu_play.onRelease,
 		--text = "Button 1 Label",
