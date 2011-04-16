@@ -7,7 +7,7 @@ module(..., package.seeall)
 
 -- Private member
 local MUSIC_CHANNEL = 1
-local BIT_OFFSET = 1
+local BIT_OFFSET = 2
 
 -- Audio settings
 audio.reserveChannels(MUSIC_CHANNEL)
