@@ -21,12 +21,11 @@ function start_slide.onSelect( e )
 	end
 	
 	local startUI = uiManager.getCurrentUI()
-	print('startUI = ', startUI)
 	local slider = startUI:getChildByName( 'slider' )
-	slider:rise{ 
-		moveY = slider.hideYPos,
-		onComplete = complete,
-	}
+	slider:rise{ moveY = slider.hideYPos, onComplete = complete, }
+	
+	local tabwindow = startUI:getChildByName( 'tabwindow' )
+	tabwindow:hide{ moveY = tabwindow.hideYPos }
 	
 	-- local ui = uiManager.getUI( utils.uipath('setting_ready') )
 	-- ui.isVisible = true
@@ -146,3 +145,14 @@ function lose_back.onRelease( e )
 	uiManager.popUI( true ):removeSelf()
 	uiManager.pushUI( uiManager.getUI( utils.uipath('setting_start') ) )
 end
+
+-- profile
+profile_tabwindow = {}
+function profile_tabwindow.onChange( e )
+	if ( e.isShow ) then
+		if ( uiManager.getCurrentUI():getChildByName( 'list' ) ) then
+			ready_back.onRelease()
+		end
+	end
+end
+

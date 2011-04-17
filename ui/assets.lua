@@ -3,6 +3,7 @@ module(..., package.seeall)
 local ui			= require( utils.uipath('component/ui') )
 local slide			= require( utils.uipath('component/slide') )
 local list			= require( utils.uipath('component/simplelist') )
+local tabwindow		= require( utils.uipath('component/tabwindow') )
 local controller	= require( utils.uipath('controller') )
 local gameModel		= require( utils.modelpath('game') )
 local gameManager	= require( utils.gamepath('gameManager') )
@@ -177,4 +178,36 @@ function lose_back()
 		--emboss = true
 	}
 	return btn
+end
+
+-- profile
+function profile_tabwindow()
+	local tabs = {
+		{
+			btn_normal = res.getArt('ui', 'profile/normal1.png'),
+			btn_toggle = res.getArt('ui', 'profile/toggle1.png'),
+			content = utils.uipath('setting_profile1'),
+		},
+		{
+			btn_normal = res.getArt('ui', 'profile/normal1.png'),
+			btn_toggle = res.getArt('ui', 'profile/toggle1.png'),
+			content = utils.uipath('setting_profile2'),
+		},
+		{
+			btn_normal = res.getArt('ui', 'profile/normal1.png'),
+			btn_toggle = res.getArt('ui', 'profile/toggle1.png'),
+			content = utils.uipath('setting_profile3'),
+		},
+		{
+			btn_normal = res.getArt('ui', 'profile/normal1.png'),
+			btn_toggle = res.getArt('ui', 'profile/toggle1.png'),
+			content = utils.uipath('setting_profile4'),
+		},
+	}
+	local tabwindow = tabwindow.new{
+		background = res.getArt('ui', 'profile/bg.png'),
+		tabs = tabs,
+		onChange = controller.profile_tabwindow.onChange,
+	}
+	return tabwindow
 end

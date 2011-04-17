@@ -21,6 +21,15 @@ layout=
 			x = display.contentWidth * .5,
 			y = display.contentHeight * .65,
 		},
+		{
+			type = 'profile_tabwindow',
+			name = 'tabwindow',
+			
+			hideYPos = -280,
+			showYPos = 0,
+			y = -280
+			
+		}
 	}
 	-- event handlers
 }

@@ -50,7 +50,9 @@ local factory, create
 function getUI( setting )
 	local layout = _G[ setting ].layout
 	
-	if not _uiCache[ layout ] then
+	-- ui must be a valid group that no removeSelf
+	-- check the insert method for this
+	if ( not _uiCache[ layout ] ) or ( not _uiCache[ layout ].insert ) then
 		_uiCache[ layout ] = create( layout )
 	end
 	
