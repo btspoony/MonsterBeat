@@ -8,3 +8,8 @@ end
 -- TODO
 function getSound()
 end
+
+-- get Phycis
+function physicsFile()
+	return 'resources/art/things/things'
+end

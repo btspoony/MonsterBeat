@@ -1,5 +1,8 @@
 -- notice the order of requirement
 
+-- System Lib
+require( "physics" )
+
 -- resource manager
 require('res')
 

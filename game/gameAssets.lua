@@ -4,9 +4,12 @@ local ipairs = ipairs
 module (..., package.seeall)
 
 --[[
-	throwable part
+	init part
 --]]
 local throwables = require('model/throwables')
+--Physic
+local scaleFactor = 1.0
+local physicsData = require(res.physicsFile()).physicsData(scaleFactor)
 
 --[[
 param: 
@@ -15,10 +18,6 @@ param:
 	name
 ]] 	
 function geneThrowable( param , container)
-	-- init item Group
-	local itemGroup = layout.group()
-	container:insert(itemGroup)
-	
 	-- Type Check
 	local itemLib = nil
 	if(param.type == 'things') then
@@ -29,38 +28,39 @@ function geneThrowable( param , container)
 	
 	-- prepare to gene items
 	math.randomseed(os.time())
-	local function createItem(group, src)
+	local function createItem(group, itemInfo)
+		--Create Item
 		local left = math.random(10)
 		local top = math.random(10)
-		local newItem = display.newImage( group, src, left, top)
+		local newItem = display.newImage( group,
+		 	res.getArt('things', itemInfo.asset..itemInfo.ext), left, top)
+		group:insert(newItem)
+		-- id
+		newItem.itemID = "ID"..system.getTimer().."R"..math.random(99)
 		
-		if(math.random()>.7) then
-			newItem.alpha = math.random() * .3+ .7
-		end
+		-- Add Physic Body
+		physics.addBody( newItem, physicsData:get(itemInfo.asset) )
+		
+		-- Create Shadow SFX
+--		local spot = display.newCircle( xCenter, yCenter, radius )
 		
 		return newItem
 	end
 	-- new item creation
 	local itemNew = nil
-	local count = param.count or 1
 	if param.name ~= nil then
 		for i,v in ipairs(itemLib) do
 			if itemLib[i].name == param.name then
-				for n=1,count do
-					createItem(itemGroup, res.getArt('things', itemLib[i].asset..itemLib[i].ext))
-				end
+				itemNew = createItem(container, itemLib[i])
 				break
 			end
 		end
 	else
-		local itemMax = #itemLib
-		for n=1,count do
-			local r = math.random(1, itemMax)
-			createItem(itemGroup, res.getArt('things', itemLib[r].asset..itemLib[r].ext))
-		end
+		local r = math.random(1, #itemLib)
+		itemNew = createItem(container, itemLib[r])
 	end
 
-	return itemGroup
+	return itemNew
 end
 
 function release( target )
