@@ -24,7 +24,7 @@ layout=
 			{
 				{
 					type = "background",
-					src = res.getArt( 'ui', 'pause/background.png' ),
+					src = res.getArt( 'ui', 'pause/background.PNG' ),
 					x = 0,
 					y = 0,
 				},

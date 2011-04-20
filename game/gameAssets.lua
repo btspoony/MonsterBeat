@@ -39,7 +39,7 @@ function geneThrowable( param , container)
 		newItem.itemID = "ID"..system.getTimer().."R"..math.random(99)
 		
 		-- Add Physic Body
-		physics.addBody( newItem, physicsData:get(itemInfo.asset) )
+		physics.addBody( newItem,'kinematic', physicsData:get(itemInfo.asset) )
 		
 		-- Create Shadow SFX
 --		local spot = display.newCircle( xCenter, yCenter, radius )

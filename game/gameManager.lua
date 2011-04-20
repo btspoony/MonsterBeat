@@ -50,9 +50,9 @@ local function onSpawn(event)
 	-- calculate the position
 	local flyT = tick * 1.75 / 1000
 	local vX = (targetX-newItem.x)/flyT
-	local aY = 2*(targetY-newItem.y)/(flyT*flyT)
+	local aY = math.abs(2*(targetY-newItem.y)/(flyT*flyT))
 	local vY = aY * flyT
-	print("FlyTime:"..flyT.." vX:"..vX.." aY:"..aY.." vY"..vY)
+	print(" vX:"..vX.." aY:"..aY.." vY"..vY)
 	
 	newItem:applyForce(0,aY,newItem.x,newItem.y)
 	newItem:setLinearVelocity(vX,vY)
