@@ -1,8 +1,12 @@
 module(..., package.seeall)
 
+local ui			= require( utils.uipath('component/ui') )
+
 local cancelMove, slideTo, sliding
 local imgNum, images
 local imageHolder, hitarea
+
+local onBack
 
 
 -- define constants
@@ -14,33 +18,60 @@ local SLIDE_WIDTH = 300
 
 -- Class Pic
 local function Pic( imgSrc )
-	local g = display.newGroup()
+	local g = ui.newButton{
+		default = imgSrc,
+		over = imgSrc,
+		onRelease = function( e )
+			onBack()
+		end
+	}
 	
-	local img = display.newImage( imgSrc )
-	
-	local black = display.newRect( 0,0, img.width, img.height )
+	local black = display.newRect( 0,0, g.width, g.height )
 	black:setFillColor( 0, 0, 0 , 255 )
 	black.alpha = 0
 	
-	g:insert( img, true )
+	local isHighlight = false
+	local isTouchEnabled = false
+	
 	g:insert( black, true )
 	
 	
-	local txt = display.newText( '', 0,0 )
-	txt.width = img.width
-	txt.height = img.height
-	txt:setTextColor( 255, 0, 0 )
-	g:insert( txt, true )
-	
-	function g:enable()
-		if ( black.alpha == 0 ) then return end
-		transition.to( black, { alpha = 0, time = 300 } )
+	function g:touchEnabled( boo )
+		isTouchEnabled = boo
+		if ( isTouchEnabled ) then
+			print('f')
+			self:addEventListener( 'touch', self )
+		else
+			self:removeEventListener( 'touch', self )
+		end
 	end
 	
-	function g:disable()
-		if ( black.alpha == .8 ) then return end
-		transition.to( black, { alpha = .8, time = 300 } )
+	function g:highlight( boo )
+		isHighlight = boo
+		
+		if ( isHighlight ) then
+			if ( black.alpha == 0 ) then return end
+			transition.to( black, { alpha = 0, time = 300 } )
+		else
+			local alpha = 1.5 - self.xScale / self.oxScale
+			if ( alpha > 1 ) then alpha = 1 end
+			transition.to( black, { alpha = alpha, time = 300 } )
+		end
 	end
+	
+	function g:hitTest( x, y )
+		local bounds = self.contentBounds
+		return  ( x >= bounds.xMin )
+			and ( x <= bounds.xMax )
+			and ( y >= bounds.yMin )
+			and ( y <= bounds.yMax )
+	end
+	
+	function g:destroy()
+		self:touchEnabled( false )
+	end
+	
+	g:touchEnabled( false )
 	
 	return g
 end
@@ -50,17 +81,20 @@ end
 local function enable()
 	hitarea:addEventListener( 'touch', hitarea )
 	Runtime:addEventListener( 'enterFrame', sliding )
+	images[ imgNum ]:touchEnabled( false )
 end
 
 local function disable()
 	hitarea:removeEventListener( 'touch', hitarea )
 	Runtime:removeEventListener( 'enterFrame', sliding )
+	images[ imgNum ]:touchEnabled( true )
 end
 
 function new( args )
 	-- default arguments
 	local imageSet 		= args.imageSet
 	local onSelect		= args.onSelect
+	onBack = args.onBack
 	
 	-- create slide main group
 	local g = display.newGroup()
@@ -91,11 +125,26 @@ function new( args )
 	-- init
 	imgNum = 1
 	
-	Runtime:addEventListener( 'enterFrame', sliding )
+	enable()
 	
-	hitarea:addEventListener( "touch", hitarea )
+	-- hitTest with depth order
+	local function hitTest( x, y )
+		
+		for i=imgNum, #images do
+			local boo = images[ i ]:hitTest( x, y )
+			if ( boo ) then return i end
+		end
+		
+		for i=imgNum-1, 1, -1 do
+			local boo = images[ i ]:hitTest( x, y )
+			if ( boo ) then return i end
+		end
+		
+		return -1
+	end
 	
 	local startPos, prevPos, dragSpeed, touchTime
+	
 	function hitarea:touch ( e ) 
 		local phase = e.phase
 		
@@ -129,12 +178,6 @@ function new( args )
 				
 				print( 'v='..v )
 				
-				local bounds = images[ imgNum ].contentBounds
-				local x, y = e.x, e.y
-				local isTapCurrent =( x >= bounds.xMin )
-								and ( x <= bounds.xMax )
-								and ( y >= bounds.yMin )
-								and ( y <= bounds.yMax )
 				-- locate slide
 				local num = math.floor( ( imageHolder.slidePos + imageHolder[1].width * .5 ) / IMAGE_GAP )
 				slideTo( num )
@@ -142,7 +185,6 @@ function new( args )
 				-- ???
 				if ( phase == "cancelled" ) then		
 					cancelMove()
-					isTapCurrent = false
 				end
 				
 				-- Allow touch events to be sent normally to the objects they "hit"
@@ -150,11 +192,12 @@ function new( args )
 				self.isFocus = false
 				
 				if 'ended' == phase then
-					if isTapCurrent == true then
-						if math.abs( v ) < SENSITIVITY_TAP then
-							if onSelect then
-								onSelect( e )
-							end
+					if math.abs( v ) < SENSITIVITY_TAP then
+						local num = hitTest( e.x, e.y )
+						if ( num == imgNum ) then
+							if onSelect then onSelect( e ) end
+						elseif ( num ~= -1 ) then
+							slideTo( num )
 						end
 					end
 				end
@@ -177,14 +220,14 @@ function new( args )
 			local p = images[ i ]
 			
 			if ( i == imgNum ) then
-				p:enable()
+				p:highlight( true )
 			else
-				p:disable()
+				p:highlight( false )
 			end
 		end
 		
-		transition.to( self, {
-			y = moveY,
+		transition.to( images[ imgNum ], {
+			y = moveY - self.y, -- minus self.y 
 			time = 800,
 			onComplete = onComplete,
 			transition = easing.outQuad
@@ -199,11 +242,11 @@ function new( args )
 		
 		for i = 1, #images do
 			local p = images[ i ]
-			p:enable()
+			p:highlight( true )
 		end
 		
-		transition.to( self, { 
-			y = moveY,
+		transition.to( images[ imgNum ], { 
+			y = moveY - self.y, -- minus self.y 
 			time = 500, 
 			onComplete = onCompletem,
 			transition = easing.outQuad
@@ -220,8 +263,12 @@ function new( args )
 	-- clean up resources
 	function g:cleanUp()
 		print("slides cleanUp")
-		disable()
+		hitarea:removeEventListener( 'touch', hitarea )
+		Runtime:removeEventListener( 'enterFrame', sliding )
 		if tween then transition.cancel( tween ) end
+		for i = 1, #images do
+			images[i]:destroy()
+		end
 	end
 	
 	-- override removeSelf
@@ -262,11 +309,6 @@ function sliding( e )
 		local ra = dx / SLIDE_WIDTH
 		local sc = ra
 		if ( sc < 0 ) then sc = -sc end
-		
-		-- debug code begin --
-		function f(d) return math.floor(d*1000)/1000 end
-		p[3].text = 'x='..p.x..'\ndx='..f(dx)..'\nratio='..f(dx/SLIDE_WIDTH) ..'\nholder.x=' .. imageHolder.x
-		-- debug code end --
 		
 		local xs = p.oxScale - p.oxScale * sc
 		local ys = p.oyScale - p.oyScale * sc

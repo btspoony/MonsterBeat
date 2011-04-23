@@ -42,6 +42,7 @@ function start_slide()
 	local g = slide.new{ 
 		imageSet = imgs,
 		onSelect = controller.start_slide.onSelect,
+		onBack   = controller.ready_back.onRelease;
 	}
 	return g
 end

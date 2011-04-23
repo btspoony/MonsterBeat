@@ -9,6 +9,17 @@ function group()
 	-- g:insert( bg )
 	-- test code
 	
+	-- getChildByName
+	function g:getChildByName( name )
+		for i = self.numChildren, 1, -1 do
+			if name == self[i].name then
+				return self[i]
+			end
+		end
+		
+		return nil
+	end
+	
 	-- override
 	local removeSelf = g.removeSelf
 	function g:removeSelf()
@@ -17,17 +28,8 @@ function group()
 				self[i]:removeSelf()
 			end
 		end
-		removeSelf( self )
-	end
-	
-	function g:getChildByName( name )
-		for i, v in ipairs( self._layout.children ) do
-			if name == v.name then
-				return self[i]
-			end
-		end
 		
-		return nil
+		removeSelf( self )
 	end
 	
 	return g
