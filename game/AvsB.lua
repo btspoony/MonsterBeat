@@ -35,7 +35,7 @@ function init( content )
 		local rect = display.newRect( 0, 0, display.contentWidth , 160 )
 		rect:setFillColor( 40, 40, 40 )
 		rect.x = display.contentWidth * .5
-		rect.y = display.contentHeight * .8
+		rect.y = display.contentHeight - 160 + 80
 		rect.name = 'hitarea'
 		return rect
 	end
@@ -48,16 +48,39 @@ function init( content )
 		local oy = ob.y
 		function f()
 			times = times - 1
-			if ( times > 1 ) then
-				ob.x = ob.x + math.random() * 8 - 4
-				ob.y = ob.y + math.random() * 2 - 1
-			else
+			if ( 0 == times ) then
 				ob.x = ox
 				ob.y = oy
+			else
+				ob.x = ob.x + math.random() * 8 - 4
+				ob.y = ob.y + math.random() * 2 - 1
 			end
 
 		end
 		timer.performWithDelay( 10, f, times )
+	end
+	
+	local function highlight( parent )
+		local rect = display.newRect( 0,0, display.contentWidth, display.contentHeight - 160 )
+		rect.strokeWidth = 5
+		rect:setStrokeColor( 255, 255, 255 )
+		rect:setFillColor( 255, 255, 255, 0 )
+		
+		parent:insert( rect )
+		
+		local times = 5
+		
+		function f()
+			times = times - 1
+			if ( 0 == times ) then
+				rect:removeSelf()
+			else
+				rect.alpha = times % 2
+				print('remove')
+			end
+			print(times)
+		end
+		timer.performWithDelay( 50, f, times )
 	end
 
 	local function showTxt( list )
@@ -87,6 +110,7 @@ function init( content )
 		table.insert( list, 'A use ' .. action.name ..' to attck B' );
 		txt.text = showTxt( list )
 		shake( b )
+		highlight( content.sfx )
 	end
 
 	function avsb:B2A( action )

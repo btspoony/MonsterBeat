@@ -11,6 +11,8 @@ local beginTime
 
 local onGestureCB
 
+local data
+
 local function handleTouch( self, e )
 	local phase = e.phase
 		
@@ -21,6 +23,7 @@ local function handleTouch( self, e )
 		prevX, prevY = e.x, e.y
 		disX, disY = 0, 0
 		beginTime = e.time
+		data = { { x = e.x, y = e.y } }
 		
 	elseif ( self._isFocus ) then
 		if ( 'moved' == phase ) then
@@ -29,6 +32,9 @@ local function handleTouch( self, e )
 			prevX, prevY = e.x, e.y
 			disX = disX + math.abs( dx )
 			disY = disY + math.abs( dy )
+			
+			table.insert( data, { x = e.x, y = e.y } )
+			
 		elseif ( 'ended' == phase or 'cancelled' == phase ) then
 			local name
 			if ( disX > 3 or disY > 3 ) then
@@ -38,7 +44,7 @@ local function handleTouch( self, e )
 			end
 			
 			print("!! Gesture !!", name )
-			onGestureCB{ name = name, endTime = e.time, beginTime = beginTime }
+			onGestureCB{ name = name, endTime = e.time, beginTime = beginTime, data = data }
 			
 			display.getCurrentStage():setFocus( self )
 			self._isFocus = false

@@ -21,7 +21,7 @@ actionManager.registerAction( 'malisgu',  { gestureManager.G_LINE,
 											gestureManager.G_LINE,
 											gestureManager.G_DOT } )
 
-
+-- handle action of player or npc
 local function handleAction( action )
 	currentGame.avsb:A2B( { name = action } )
 end
@@ -29,16 +29,43 @@ local function handleNPC( action )
 	currentGame.avsb:B2A( { name = action } )
 end
 
+
 --[[
 gesture struct
 	gesture.name
 	gesture.beginTime
 	gesture.endTime
+	gesture.data
 --]]
+-- gesture feedback
+local function feedback_dot( parent, data )
+	local dot = display.newCircle( data[1].x, data[1].y, 2 )
+	transition.to( dot, { width = 15, height = 15, alpha = 0,
+		onComplete = function() dot:removeSelf() end
+	} )
+end
+local function feedback_line( parent, data )
+	local line = display.newLine( data[1].x, data[1].y, data[1].x, data[1].y )
+	for i=2, #data do
+		line:append( data[i].x, data[i].y )
+	end
+	transition.to( line, { alpha = 0,
+		onComplete = function() line:removeSelf() end
+	} )
+end
+local function feedback( gesture )
+	if ( gesture.name == gestureManager.G_DOT ) then
+		feedback_dot( currentGame.gameContent.ui, gesture.data )
+	else
+		feedback_line( currentGame.gameContent.ui, gesture.data )
+	end
+end
 
 -- handle gesture generating
 local gestures = {}
 local function handleGesture( gesture )
+	-- draw feedback
+	feedback( gesture )
 	
 	-- bad beat
 	if ( not currentGame.level:inBeat( gesture.endTime ) ) then
