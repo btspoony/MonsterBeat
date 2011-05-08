@@ -2,12 +2,13 @@ module(..., package.seeall)
 
 -- Reference 
 local uiManager = require( utils.uipath('manager') )
-local gameManager	= require( utils.gamepath('gameManager') )
+local gameManager	= require( utils.gamepath('GameManager') )
 
 -- main menu
 mainmenu_play = {}
 function mainmenu_play.onRelease( e )
-	uiManager.pushUI( uiManager.getUI( utils.uipath('setting_start') ) )
+	-- uiManager.pushUI( uiManager.getUI( utils.uipath('setting_start') ) )
+	ready_chooser.onSelect()
 end
 
 -- start

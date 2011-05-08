@@ -6,7 +6,7 @@ local list			= require( utils.uipath('component/simplelist') )
 local tabwindow		= require( utils.uipath('component/tabwindow') )
 local controller	= require( utils.uipath('controller') )
 local gameModel		= require( utils.modelpath('game') )
-local gameManager	= require( utils.gamepath('gameManager') )
+local gameManager	= require( utils.gamepath('GameManager') )
 
 
 -- logo
@@ -212,3 +212,4 @@ function profile_tabwindow()
 	}
 	return tabwindow
 end
+

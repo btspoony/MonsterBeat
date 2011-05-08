@@ -2,63 +2,33 @@
 	Desc: This is the Level Manager to trigger game object
 	Func: The function loadLevel() returns a level object with all level function
 	Date: 2011.03.27 Tang Bo Hao
+		2011.05.07 Chen Ran
 --]]
 module(..., package.seeall)
+
 
 -- Private member
 local MUSIC_CHANNEL = 1
 local BIT_OFFSET = 2
 
+
 -- Audio settings
 audio.reserveChannels(MUSIC_CHANNEL)
 
+
 -- Level Manager 
-function loadLevel(levelname)
+function loadLevel( name )
 	-- Init the return value of level
 	local level = {}
 	
 	-- properties
-	level.info = require("level/"..levelname).getLevelData()
-	level.music = audio.loadStream("level/"..levelname..".ogg")
+	level.info = require("level/" .. name).getLevelData()
+	level.music = audio.loadStream("level/"..name..".ogg")
 	level.enable = false
-	level.counter = 0
-	
-	--set level's tick function
-	function level:timer(event)
-		-- Add Counter
-		local delta = event.time - self.lastTick
-		self.counter = self.counter + delta
-		self.lastTick = event.time
-		
-		-- Check if can spawn and then dispatch level event
-		local tickCount = math.floor(self.counter/(60*1000/self.info.bpm))
-		local levelDetail = self.info.levels[self.currLevel]
-		local blockCount = math.floor(tickCount / levelDetail.blockHitsMax)+1
-		local hitCount = tickCount % levelDetail.blockHitsMax+1-BIT_OFFSET
-		print("Block "..blockCount.." - Hit "..hitCount)
-		
-		-- Bit check
-		local bitBlock = levelDetail.hits[blockCount]
-		if(bitBlock ~= nil) then 
-			local testHit = bitBlock[hitCount]
-	
-			if(testHit ~= nil) then
-				local evt = { name="spawn", target=self, position=testHit}
-				self.spawnCB(evt)
-			end
-		end
-		
-		-- turn off when level finished
-		if( self.counter >= self.info.time*1000) then
-			self.enable = false
-		end
-		
-		-- turn off timer when disabled
-		if( self.enable == false ) then
-			timer.cancel( event.source ) 
-		end
-	end
-	
+	level.startTime = 0
+	level.pauseDuration = 0
+
+
 	function level:onComplete(event)
 	--[[ 
 		event has
@@ -72,31 +42,25 @@ function loadLevel(levelname)
 	end
  	
  	-- Start Level and Register to call timer method
- 	function level:startLevel(index, param)
+ 	function level:startLevel( param )
  		-- only stoped level can be started
- 		if( self.enable == true or self.counter > 0) then
+ 		if( self.enable == true ) then
  			return nil
  		end
  		
  		-- init
 		self.enable = true
-		self.counter = 0
-		self.lastTick = system.getTimer()
-		self.currLevel = index
-		self.spawnCB = param["spawn"]
-		self.completeCB = param["complete"]
-		print("Starting Level-"..self.currLevel)
+		self.completeCB = param.onComplete
+		
+
+		self.startTime = system.getTimer()
+		self.pauseDuration = 0
 
 		-- start music 
 		local this = self
 		audio.play(self.music, {channel=MUSIC_CHANNEL, loops=0,
 		 		onComplete = function(event) this:onComplete() end})
-		
-		-- start the tick 
-		local tick = (60*1000/self.info.bpm)
-	 	timer.performWithDelay( tick, self, 0 )
-	 	
-		return self.info.levels[i], tick
+
  	end
 	
  	-- Stop Level
@@ -108,12 +72,12 @@ function loadLevel(levelname)
  		
  		-- disable the level and reset		
 		self.enable = false
-		self.counter = 0
 		
 		-- stop music if not stoped
 		if audio.isChannelPlaying(MUSIC_CHANNEL) then
 			audio.stop(MUSIC_CHANNEL)
 		end
+
  	end
  	
  	-- Pause Level
@@ -131,24 +95,43 @@ function loadLevel(levelname)
 		if audio.isChannelPlaying(MUSIC_CHANNEL) then
 			audio.pause(MUSIC_CHANNEL)
 		end
+
 	end
  	
  	-- Resume Level
  	function level:resumeLevel()
  		-- only stoped level can be started
- 		if( self.enable == false and self.counter ~= 0) then
+ 		if( self.enable == false) then
  			self.enable = true
+			gesture.enabled( true )
+			npc.enabled( true )
 			
 			-- resume music if paused
 			if audio.isChannelPaused(MUSIC_CHANNEL) then
 				audio.resume(MUSIC_CHANNEL)
 			end
-			
-			-- start the tick 
-			self.lastTick = self.lastTick + system.getTimer() - self.pauseTime
-		 	timer.performWithDelay( (60*1000/self.info.bpm), self, 0 )
+
+			local dt = system.getTimer() - self.pauseTime
+			self.pauseDuration = self.pauseDuration + dt
+
  		end
  	end
+
+
+	-- check the gesture is happend in beat
+	function level:inBeat( time )
+		local time = time - self.startTime - self.pauseDuration
+		
+		-- math.round
+		local t,f = math.modf( time / self.info.mpb )
+		if ( f < 0.5 ) then t = t * self.info.mpb
+		else t = ( t + 1 ) * self.info.mpb end
+		
+		
+		local result = ( time > ( t - 200 ) ) and ( time < ( t + 200 ) )
+		print("TTTTTTTT", 'time='..time, 't='..t, 'result='..tostring(result));
+		return result
+	end
 	
 	-- dispose level
 	function level:dispose()
@@ -156,10 +139,6 @@ function loadLevel(levelname)
 		audio.dispose(self.music)
 		self.music = nil
 		self.enable = nil
-		self.counter = nil
-		self.lastTick = nil
-		self.currLevel = nil
-		self.spawnCB = nil
 		self.completeCB = nil
 	end
 	
