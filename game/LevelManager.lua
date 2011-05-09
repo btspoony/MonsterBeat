@@ -25,9 +25,28 @@ function loadLevel( name )
 	level.info = require("level/" .. name).getLevelData()
 	level.music = audio.loadStream("level/"..name..".ogg")
 	level.enable = false
-	level.startTime = 0
-	level.pauseDuration = 0
+	level.lastTick = 0
+	level.tick = 60 * 1000 / level.info.bpm
 
+
+	--set level's tick function
+	function level:timer( event )
+
+		-- turn off timer when disabled
+		if( not self.enable ) then
+			timer.cancel( event.source ) 
+			return
+		end
+
+		-- record the tick
+		self.lastTick = event.time
+
+		-- tick
+		local evt = { name="spawn", target=self, time=self.lastTick }
+		self.spawnCB(evt)
+
+		self.timerSource = timer.performWithDelay( self.tick, self, 1 )
+	end
 
 	function level:onComplete(event)
 	--[[ 
@@ -50,23 +69,23 @@ function loadLevel( name )
  		
  		-- init
 		self.enable = true
+		self.spawnCB = param.onSpawn
 		self.completeCB = param.onComplete
-		
-
-		self.startTime = system.getTimer()
-		self.pauseDuration = 0
+		self.lastTick = system.getTimer()
 
 		-- start music 
 		local this = self
 		audio.play(self.music, {channel=MUSIC_CHANNEL, loops=0,
 		 		onComplete = function(event) this:onComplete() end})
 
+		-- start the tick 
+	 	self.timerSource = timer.performWithDelay( self.tick, self, 1 )
  	end
 	
  	-- Stop Level
  	function level:stopLevel() 
  		-- only started level can be stoped
- 		if( self.enable == false) then
+ 		if( self.enable == false ) then
  			return nil
  		end
  		
@@ -78,12 +97,14 @@ function loadLevel( name )
 			audio.stop(MUSIC_CHANNEL)
 		end
 
+		-- stop the tick
+		timer.cancel( self.timerSource )
  	end
  	
  	-- Pause Level
  	function level:pauseLevel() 
  		-- only started level can be paused
- 		if( self.enable == false) then
+ 		if( self.enable == false ) then
  			return nil
  		end
  		
@@ -96,45 +117,33 @@ function loadLevel( name )
 			audio.pause(MUSIC_CHANNEL)
 		end
 
+		-- stop the tick
+		timer.cancel( self.timerSource )
 	end
  	
  	-- Resume Level
  	function level:resumeLevel()
  		-- only stoped level can be started
- 		if( self.enable == false) then
+ 		if( self.enable == false ) then
  			self.enable = true
-			gesture.enabled( true )
-			npc.enabled( true )
 			
 			-- resume music if paused
 			if audio.isChannelPaused(MUSIC_CHANNEL) then
 				audio.resume(MUSIC_CHANNEL)
 			end
 
-			local dt = system.getTimer() - self.pauseTime
-			self.pauseDuration = self.pauseDuration + dt
-
+			-- start the tick 
+			local t = system.getTimer()
+			self.lastTick = self.lastTick + t - self.pauseTime
+		 	self.timerSource = timer.performWithDelay( t - self.lastTick, self, 1 )
  		end
  	end
 
 
-	-- check the gesture is happend in beat
-	function level:inBeat( time )
-		local time = time - self.startTime - self.pauseDuration
-		
-		-- math.round
-		local t,f = math.modf( time / self.info.mpb )
-		if ( f < 0.5 ) then t = t * self.info.mpb
-		else t = ( t + 1 ) * self.info.mpb end
-		
-		
-		local result = ( time > ( t - 200 ) ) and ( time < ( t + 200 ) )
-		print("TTTTTTTT", 'time='..time, 't='..t, 'result='..tostring(result));
-		return result
-	end
-	
 	-- dispose level
 	function level:dispose()
+		timer.cancel( self.timerSource )
+		self.timerSource = nil
 		self.info = nil
 		audio.dispose(self.music)
 		self.music = nil
