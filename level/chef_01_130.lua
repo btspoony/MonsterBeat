@@ -1,4 +1,4 @@
---[[ 
+--[[
 	Desc: This file is for use with Corona Game Edition
 	Func: The function getLevelData() returns a table suitable for importing  GameLevel
 	Date: 2011.03.27 Tang Bo Hao
@@ -11,8 +11,7 @@ function getLevelData()
 
 	local sheet = {
 		name = "Level1",
-		bpm = 100,
-		mpb = ( 60 * 1000 ) / 100
+		bpm = 100
 	}
 
 	return sheet

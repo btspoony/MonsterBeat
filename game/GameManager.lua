@@ -68,16 +68,28 @@ local function handleGesture( gesture )
 	feedback( gesture )
 	
 	-- bad beat
-	if ( not currentGame.level:inBeat( gesture.endTime ) ) then
+	local result, index = currentGame.level:inBeat( gesture.endTime )
+	if ( not result ) then
 		gestures = {}
 		return
 	end
 	
-	-- TODO no continuous beats
+	-- no continuous beats
+	local length = #gestures
+	if ( length > 0 ) then
+		if ( gestures[ length ]._beatIndex + 1 ~= index ) then
+			gestures = {}
+		end
+	end
 
+
+	-- dirty ref
+	gesture._beatIndex = index
+	-- record gesture
 	table.insert( gestures, gesture )
 	
-	local length = #gestures
+	-- limit
+	length = #gestures
 	if ( length < actionManager.minCommandLength ) then return end
 	if ( length > actionManager.maxCommandLength ) then table.remove( gestures, 1 ) end
 	
@@ -120,6 +132,8 @@ local function handleEnterFrame( e )
 	end
 end
 
+local function onSpawn( event )
+end
 
 local function onComplete( event )
 	-- TODO
@@ -187,7 +201,7 @@ function startGame()
 	end
 	
 	-- Start Game Level
-	currentGame.level:startLevel({onComplete = onComplete })
+	currentGame.level:startLevel{ onSpawn = onSpawn, onComplete = onComplete }
 	
 	currentGame.status = "started"
 

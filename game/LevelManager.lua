@@ -25,8 +25,10 @@ function loadLevel( name )
 	level.info = require("level/" .. name).getLevelData()
 	level.music = audio.loadStream("level/"..name..".ogg")
 	level.enable = false
+	level.startTime = 0
+	level.pauseDuration = 0
 	level.lastTick = 0
-	level.tick = 60 * 1000 / level.info.bpm
+	level.tickTime = 60 * 1000 / level.info.bpm
 
 
 	--set level's tick function
@@ -45,7 +47,7 @@ function loadLevel( name )
 		local evt = { name="spawn", target=self, time=self.lastTick }
 		self.spawnCB(evt)
 
-		self.timerSource = timer.performWithDelay( self.tick, self, 1 )
+		self.timerSource = timer.performWithDelay( self.tickTime, self, 1 )
 	end
 
 	function level:onComplete(event)
@@ -72,6 +74,8 @@ function loadLevel( name )
 		self.spawnCB = param.onSpawn
 		self.completeCB = param.onComplete
 		self.lastTick = system.getTimer()
+		self.startTime = system.getTimer()
+		self.pauseDuration = 0
 
 		-- start music 
 		local this = self
@@ -79,7 +83,7 @@ function loadLevel( name )
 		 		onComplete = function(event) this:onComplete() end})
 
 		-- start the tick 
-	 	self.timerSource = timer.performWithDelay( self.tick, self, 1 )
+	 	self.timerSource = timer.performWithDelay( self.tickTime, self, 1 )
  	end
 	
  	-- Stop Level
@@ -134,10 +138,28 @@ function loadLevel( name )
 
 			-- start the tick 
 			local t = system.getTimer()
-			self.lastTick = self.lastTick + t - self.pauseTime
+			local dt = t - self.pauseTime
+			self.lastTick = self.lastTick + dt
+			self.pauseDuration = self.pauseDuration + dt
 		 	self.timerSource = timer.performWithDelay( t - self.lastTick, self, 1 )
  		end
  	end
+
+	-- check the gesture is happend in beat
+	function level:inBeat( time )
+		local time = time - self.startTime - self.pauseDuration
+
+		-- math.round
+		local i,f = math.modf( time / self.tickTime )
+		if ( f >= 0.5 ) then i = i + 1 end
+
+		local t = i * self.tickTime
+
+		local result = ( time > ( t - 200 ) ) and ( time < ( t + 200 ) )
+		print("TTTTTTTT", 'time='..time, 't='..t, 'result='..tostring(result));
+		return result, i
+	end
+
 
 
 	-- dispose level

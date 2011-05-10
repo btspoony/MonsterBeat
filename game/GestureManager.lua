@@ -46,7 +46,7 @@ local function handleTouch( self, e )
 			print("!! Gesture !!", name )
 			onGestureCB{ name = name, endTime = e.time, beginTime = beginTime, data = data }
 			
-			display.getCurrentStage():setFocus( self )
+			display.getCurrentStage():setFocus( nil )
 			self._isFocus = false
 		end
 	end

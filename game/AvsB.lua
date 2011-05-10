@@ -76,9 +76,7 @@ function init( content )
 				rect:removeSelf()
 			else
 				rect.alpha = times % 2
-				print('remove')
 			end
-			print(times)
 		end
 		timer.performWithDelay( 50, f, times )
 	end
